@@ -53,6 +53,23 @@ public class KdbxXmlWriter {
 			)
 		);
 
+		if (meta.CustomIcons.Count > 0) {
+			var iconsEl = new XElement("CustomIcons");
+			foreach (var icon in meta.CustomIcons) {
+				var iconEl = new XElement("Icon",
+					new XElement("UUID", GuidToBase64(icon.Uuid)),
+					new XElement("Data", Convert.ToBase64String(icon.Data))
+				);
+				if (!string.IsNullOrEmpty(icon.Name))
+					iconEl.Add(new XElement("Name", icon.Name));
+				if (icon.LastModificationTime.HasValue)
+					iconEl.Add(new XElement("LastModificationTime",
+						FormatDate(icon.LastModificationTime.Value)));
+				iconsEl.Add(iconEl);
+			}
+			el.Add(iconsEl);
+		}
+
 		// V3: binary pool lives in <Meta><Binaries>; V4: it goes in the inner header
 		if (!_isV4 && _binaryPool.Count > 0) {
 			var binariesEl = new XElement("Binaries");
@@ -81,6 +98,8 @@ public class KdbxXmlWriter {
 			new XElement("IsExpanded", group.IsExpanded ? "True" : "False"),
 			WriteTimes(group.Times)
 		);
+		if (group.CustomIconUuid != Guid.Empty)
+			el.Add(new XElement("CustomIconUUID", GuidToBase64(group.CustomIconUuid)));
 		if (group.EnableAutoType.HasValue)
 			el.Add(new XElement("EnableAutoType",  group.EnableAutoType.Value  ? "True" : "False"));
 		if (group.EnableSearching.HasValue)
@@ -107,6 +126,8 @@ public class KdbxXmlWriter {
 			new XElement("Tags",            entry.Tags),
 			WriteTimes(entry.Times)
 		);
+		if (entry.CustomIconUuid != Guid.Empty)
+			el.Add(new XElement("CustomIconUUID", GuidToBase64(entry.CustomIconUuid)));
 
 		foreach (var (key, entryStr) in entry.Strings) {
 			XElement valEl;

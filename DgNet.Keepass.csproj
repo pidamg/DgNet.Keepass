@@ -7,7 +7,7 @@
 
 		<!-- NuGet -->
 		<PackageId>DgNet.Keepass</PackageId>
-		<Version>0.1.0</Version>
+		<Version>0.2.0</Version>
 		<Authors>pidamg</Authors>
 		<Description>A .NET library for reading and writing KeePass (.kdbx) password database files.</Description>
 		<PackageTags>keepass;kdbx;password;vault</PackageTags>

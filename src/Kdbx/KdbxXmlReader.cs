@@ -50,7 +50,7 @@ public class KdbxXmlReader {
 
 	// ── Meta ─────────────────────────────────────────────────────────────────
 
-	private static Metadata ParseMeta(XElement? el) {
+	private Metadata ParseMeta(XElement? el) {
 		if (el == null) return new Metadata();
 		return new Metadata {
 			Name              = el.Element("DatabaseName")?.Value ?? "",
@@ -62,7 +62,28 @@ public class KdbxXmlReader {
 			HistoryMaxSize    = ParseLong(el.Element("HistoryMaxSize")?.Value, 6_291_456),
 			ProtectPassword   = ParseBool(
 				el.Element("MemoryProtection")?.Element("ProtectPassword")?.Value, true),
+			CustomIcons       = ParseCustomIcons(el.Element("CustomIcons")),
 		};
+	}
+
+	// ── Custom icons ──────────────────────────────────────────────────────────
+	// <CustomIcons><Icon><UUID>…</UUID><Name>…</Name><Data>…</Data></Icon></CustomIcons>
+
+	private List<CustomIcon> ParseCustomIcons(XElement? el) {
+		var list = new List<CustomIcon>();
+		if (el == null) return list;
+		foreach (var iconEl in el.Elements("Icon")) {
+			var uuid = ParseUuid(iconEl.Element("UUID")?.Value);
+			var data = iconEl.Element("Data")?.Value;
+			if (data == null) continue;
+			list.Add(new CustomIcon {
+				Uuid                 = uuid,
+				Data                 = Convert.FromBase64String(data),
+				Name                 = iconEl.Element("Name")?.Value ?? "",
+				LastModificationTime = ParseDateNullable(iconEl.Element("LastModificationTime")?.Value),
+			});
+		}
+		return list;
 	}
 
 	// ── Binary pool (KDBX 3.x) ───────────────────────────────────────────────
@@ -100,6 +121,7 @@ public class KdbxXmlReader {
 			Name            = el.Element("Name")?.Value ?? "",
 			Notes           = el.Element("Notes")?.Value ?? "",
 			IconId          = ParseInt(el.Element("IconID")?.Value, 0),
+			CustomIconUuid  = ParseUuid(el.Element("CustomIconUUID")?.Value),
 			IsExpanded      = ParseBool(el.Element("IsExpanded")?.Value, true),
 			EnableAutoType  = ParseBoolNullable(el.Element("EnableAutoType")?.Value),
 			EnableSearching = ParseBoolNullable(el.Element("EnableSearching")?.Value),
@@ -123,6 +145,7 @@ public class KdbxXmlReader {
 		var entry = new Entry {
 			Uuid            = ParseUuid(el.Element("UUID")?.Value),
 			IconId          = ParseInt(el.Element("IconID")?.Value, 0),
+			CustomIconUuid  = ParseUuid(el.Element("CustomIconUUID")?.Value),
 			ForegroundColor = el.Element("ForegroundColor")?.Value ?? "",
 			BackgroundColor = el.Element("BackgroundColor")?.Value ?? "",
 			OverrideUrl     = el.Element("OverrideURL")?.Value ?? "",
@@ -213,6 +236,11 @@ public class KdbxXmlReader {
 	// ── Helpers ───────────────────────────────────────────────────────────────
 
 	private static readonly DateTime KdbxV4Epoch = new(1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+	private DateTime? ParseDateNullable(string? value) {
+		if (string.IsNullOrEmpty(value)) return null;
+		return ParseDate(value);
+	}
 
 	private DateTime ParseDate(string? value) {
 		if (string.IsNullOrEmpty(value)) return DateTime.MinValue;
