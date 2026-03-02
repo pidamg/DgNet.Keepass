@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<DefaultItemExcludes>$(DefaultItemExcludes);libs/**;tests/**</DefaultItemExcludes>
+		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<LangVersion>12</LangVersion>
+
+		<!-- NuGet -->
+		<PackageId>DgNet.Keepass</PackageId>
+		<Version>0.1.0</Version>
+		<Authors>pidamg</Authors>
+		<Description>A .NET library for reading and writing KeePass (.kdbx) password database files.</Description>
+		<PackageTags>keepass;kdbx;password;vault</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/pidamg/DgNet.Keepass</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="/" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
+	</ItemGroup>
+</Project>
