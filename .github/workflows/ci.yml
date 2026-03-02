@@ -38,7 +38,8 @@ jobs:
         if: matrix.dotnet == '10.0'
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"MarkdownSummaryGithub"
+          REPORTS=$(find . -name "coverage.cobertura.xml" | tr '\n' ';' | sed 's/;$//')
+          reportgenerator -reports:"$REPORTS" -targetdir:"coverage/report" -reporttypes:"MarkdownSummaryGithub"
           cat coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
   pack:
