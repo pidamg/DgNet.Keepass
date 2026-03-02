@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
@@ -31,7 +32,19 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test tests/ --no-build --configuration Release --framework net${{ matrix.dotnet }}
+        run: dotnet test tests/ --no-build --configuration Release --framework net${{ matrix.dotnet }} --collect:"XPlat Code Coverage" --results-directory coverage
+
+      - name: Coverage summary
+        if: matrix.dotnet == '10.0'
+        uses: danielpalme/ReportGenerator-GitHub-Action@6
+        with:
+          reports: coverage/**/coverage.cobertura.xml
+          targetdir: coverage/report
+          reporttypes: MarkdownSummaryGithub
+
+      - name: Write coverage to job summary
+        if: matrix.dotnet == '10.0'
+        run: cat coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
   pack:
     runs-on: ubuntu-latest
@@ -47,3 +60,30 @@ jobs:
 
       - name: Pack
         run: dotnet pack --configuration Release
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pack
+        run: dotnet pack --configuration Release --output nupkgs
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+
+      - name: Push to NuGet.org
+        run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
