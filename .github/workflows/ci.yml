@@ -36,15 +36,10 @@ jobs:
 
       - name: Coverage summary
         if: matrix.dotnet == '10.0'
-        uses: danielpalme/ReportGenerator-GitHub-Action@5
-        with:
-          reports: coverage/**/coverage.cobertura.xml
-          targetdir: coverage/report
-          reporttypes: MarkdownSummaryGithub
-
-      - name: Write coverage to job summary
-        if: matrix.dotnet == '10.0'
-        run: cat coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"MarkdownSummaryGithub"
+          cat coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
   pack:
     runs-on: ubuntu-latest
