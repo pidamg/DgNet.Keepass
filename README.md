@@ -105,9 +105,10 @@ IEnumerable<Group> FindAllGroups(Func<Group, bool> predicate)
 // Properties
 Database? Database    { get; }
 Group?    ParentGroup { get; }
-Guid      Uuid        { get; set; }
-int       IconId      { get; set; }
-string    Tags        { get; set; }
+Guid      Uuid           { get; set; }
+int       IconId         { get; set; }   // built-in icon index
+Guid      CustomIconUuid { get; set; }   // Guid.Empty = none
+string    Tags           { get; set; }
 Times     Times       { get; set; }
 AutoType  AutoType    { get; set; }
 Dictionary<string, EntryString> Strings  { get; set; }
@@ -138,7 +139,8 @@ Group?    ParentGroup     { get; }
 Guid      Uuid            { get; set; }
 string    Name            { get; set; }
 string    Notes           { get; set; }
-int       IconId          { get; set; }
+int       IconId          { get; set; }   // built-in icon index
+Guid      CustomIconUuid  { get; set; }   // Guid.Empty = none
 bool      IsExpanded      { get; set; }
 bool?     EnableAutoType  { get; set; }
 bool?     EnableSearching { get; set; }
@@ -163,6 +165,34 @@ IEnumerable<Entry> FindAllEntries(Func<Entry, bool> predicate)
 Group?             FindGroup(string name)
 Group?             FindGroup(Func<Group, bool> predicate)
 IEnumerable<Group> FindAllGroups(Func<Group, bool> predicate)
+```
+
+### `CustomIcon`
+
+Custom icons stored in `<Meta><CustomIcons>`. Each icon has a UUID that entries and groups reference via their `CustomIconUuid` property.
+
+```csharp
+public class CustomIcon {
+    Guid      Uuid                 { get; set; }  // auto-generated if not set
+    byte[]    Data                 { get; set; }  // PNG bytes
+    string    Name                 { get; set; }  // optional (KeePassXC extension)
+    DateTime? LastModificationTime { get; set; }  // optional (KeePassXC extension)
+}
+```
+
+Usage:
+
+```csharp
+// Add a custom icon to the database
+var icon = new CustomIcon { Data = File.ReadAllBytes("icon.png"), Name = "github" };
+db.Metadata.CustomIcons.Add(icon);
+
+// Assign it to an entry or group
+entry.CustomIconUuid = icon.Uuid;
+group.CustomIconUuid = icon.Uuid;
+
+// Look up an icon by UUID
+var icon = db.Metadata.CustomIcons.FirstOrDefault(i => i.Uuid == entry.CustomIconUuid);
 ```
 
 ### `Settings`
@@ -320,7 +350,7 @@ dotnet pack     # Create NuGet package
 
 ## Roadmap
 
-- [ ] Custom icons (`<Meta><CustomIcons>`)
+- [x] Custom icons (`<Meta><CustomIcons>`)
 - [ ] Additional `<Meta>` fields (`Generator`, `MasterKeyChanged`, full `MemoryProtection`…)
 - [x] `FindEntry()` / `FindGroup()` — recursive search on `Group` and `Database`
 - [ ] Save synchronization — detect if the file was modified between open and save, merge changes instead of overwriting

@@ -16,6 +16,7 @@ public class Group {
 	public string Name            { get; set; } = "";
 	public string Notes           { get; set; } = "";
 	public int    IconId          { get; set; }
+	public Guid   CustomIconUuid  { get; set; }
 	public bool   IsExpanded      { get; set; } = true;
 	public bool?  EnableAutoType  { get; set; }
 	public bool?  EnableSearching { get; set; }
@@ -103,6 +104,7 @@ public class Group {
 			Name            = this.Name,
 			Notes           = this.Notes,
 			IconId          = this.IconId,
+			CustomIconUuid  = this.CustomIconUuid,
 			IsExpanded      = this.IsExpanded,
 			EnableAutoType  = this.EnableAutoType,
 			EnableSearching = this.EnableSearching,

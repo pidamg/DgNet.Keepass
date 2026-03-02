@@ -14,6 +14,7 @@ public class Entry {
 
 	public Guid   Uuid            { get; set; } = Guid.NewGuid();
 	public int    IconId          { get; set; }
+	public Guid   CustomIconUuid  { get; set; }
 	public string ForegroundColor { get; set; } = "";
 	public string BackgroundColor { get; set; } = "";
 	public string OverrideUrl     { get; set; } = "";
@@ -96,6 +97,7 @@ public class Entry {
 		var copy = new Entry {
 			Uuid            = this.Uuid,
 			IconId          = this.IconId,
+			CustomIconUuid  = this.CustomIconUuid,
 			ForegroundColor = this.ForegroundColor,
 			BackgroundColor = this.BackgroundColor,
 			OverrideUrl     = this.OverrideUrl,
