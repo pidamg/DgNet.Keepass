@@ -81,6 +81,8 @@ jobs:
       - name: NuGet login
         uses: NuGet/login@v1
         id: login
+        with:
+          user: pidamg
 
       - name: Push to NuGet.org
         run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
