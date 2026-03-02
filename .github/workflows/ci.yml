@@ -32,17 +32,8 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test tests/ --no-build --configuration Release --framework net${{ matrix.dotnet }} --collect:"XPlat Code Coverage" --results-directory coverage
-
-      - name: Debug coverage files
         if: matrix.dotnet == '10.0'
-        run: |
-          echo "=== coverage/ ==="
-          ls -la coverage/ 2>/dev/null || echo "(not found)"
-          echo "=== TestResults/ ==="
-          ls -la TestResults/ 2>/dev/null || echo "(not found)"
-          echo "=== All XML files ==="
-          find . -name "*.xml" 2>/dev/null | head -30
+        run: dotnet test tests/ --configuration Release --framework net10.0 --collect:"XPlat Code Coverage" --results-directory coverage
 
       - name: Coverage summary
         if: matrix.dotnet == '10.0'
